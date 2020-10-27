@@ -4,13 +4,38 @@ import requests
 api_tele='1123336681:AAHRtAKrXBx5znWDgafdHtHLdVoVMhlx9kM'
 bot =telebot.TeleBot(api_tele)
 
+stats=[
+            ("hi", "hey!"),
+            ("apa yang bisa bot ini lakukan?", "Bot ini bisa mengubah text bahasa indonesia menjadi voice dalam bahasa inggris dan juga dapat mengubah voice dalam bahasa inggris menjadi text dalam bahasa indonesia"),
+            ("apa yg bisa kamu lakukan?", "Bot ini bisa mengubah text bahasa indonesia menjadi voice dalam bahasa inggris dan juga dapat mengubah voice dalam bahasa inggris menjadi text dalam bahasa indonesia")
+]
 
+def getResponse(input):
+    for stat in stats:
+        if input.text.lower() == stat[0]:
+            return stat[1]
+    else:    
+        tts(input)
+        return "ini hasil translate nya."
+    # return "Saya tidak mengerti apa yang anda maksud"
+
+@bot.message_handler(func=lambda message: message.entities == None)
+def post(message):
+    id = message.chat.id
+    input = message
+
+    bot_output = getResponse(input)
+
+    url = "https://api.telegram.org/bot1123336681:AAHRtAKrXBx5znWDgafdHtHLdVoVMhlx9kM/sendMessage"
+
+    r = requests.post(url =url, params = {'chat_id': id, 'text': bot_output})
+    rj = r.json()
 
 def to_audio(text):
     print('start tts')
     somestr = '{"text":'
     b = somestr+'"'+text+'"'+'}'
-    r = requests.post(url = 'https://api.jp-tok.text-to-speech.watson.cloud.ibm.com/instances/a004e258-6b11-474b-b2d0-220b544a86cf/v1/synthesize?voice=ar-AR_OmarVoice', auth = ('apikey', 'AmRMHRsrnuuARxZmHWLFn876io_-w7akmzV63TYwDYdB'), headers = {"Content-Type" : "application/json", "Accept" : "audio/ogg", 'voice':'en-US_AllisonV3Voice'}, data = b, stream = True)
+    r = requests.post(url = 'https://api.jp-tok.text-to-speech.watson.cloud.ibm.com/instances/a004e258-6b11-474b-b2d0-220b544a86cf/v1/synthesize?voice=en-US_LisaV3Voice', auth = ('apikey', 'AmRMHRsrnuuARxZmHWLFn876io_-w7akmzV63TYwDYdB'), headers = {"Content-Type" : "application/json", "Accept" : "audio/ogg"}, data = b, stream = True)
     
     with open('filetts.ogg', 'wb') as fd:
         for chunk in r.iter_content(chunk_size=128):
@@ -38,6 +63,8 @@ def translateid(text):
     r = requests.post(url = 'https://api.jp-tok.language-translator.watson.cloud.ibm.com/instances/b6c85ded-6ffb-48a6-b2d1-20faecaefb33/v3/translate?version=2018-05-01', auth = ('apikey', 'J9XNdjEYMmLsgSmwzC9Z5RrLvtYx9BpREdF4xeiZLW-z'), headers = {"Content-Type": "application/json"}, data = b)    
     rj = r.json()
     print('tid success')
+    print (rj['translations'][0]['translation'])
+
     return (rj['translations'][0]['translation'])
     
 
@@ -47,13 +74,16 @@ def translateen(text):
     r = requests.post(url = 'https://api.jp-tok.language-translator.watson.cloud.ibm.com/instances/b6c85ded-6ffb-48a6-b2d1-20faecaefb33/v3/translate?version=2018-05-01', auth = ('apikey', 'J9XNdjEYMmLsgSmwzC9Z5RrLvtYx9BpREdF4xeiZLW-z'), headers = {"Content-Type": "application/json"}, data = b)    
     rj = r.json()
     print('ted success')
-    return (rj['translations'][0]['translation'])
+    print (rj['translations'][0]['translation'])
 
-@bot.message_handler(commands=['tts'])
+    return (rj['translations'][0]['translation'])
+    
+
+# @bot.message_handler(content_types=['text'])
 def tts(message):
     print('handler tts')
     text = message.text
-    id = message.from_user.id
+    id = message.chat.id
     
     text = text[5:]
     print('translate text')
@@ -84,8 +114,7 @@ def stt(message):
 def start(message):
     bot.reply_to(message, '''
 Selamat datang di cbapi_18081010071_bot
-Masukkan command "/tts {kalimat bahasa indonesia}" untuk mengubah text tersebut menjadi voice dalam bahasa inggris.
-Kirimkan voice note dalam bahasa inggris maka akan tertranslate ke bahasa indonesia dalam bentuk teks.
+Apa yang bisa saya lakukan?
     ''')
 
 bot.polling()
