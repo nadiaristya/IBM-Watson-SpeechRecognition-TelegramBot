@@ -1,7 +1,7 @@
 import telebot
 import requests
 
-api_tele='1123336681:AAHRtAKrXBx5znWDgafdHtHLdVoVMhlx9kM'
+api_tele='YOUR TELEGRAM BOT API'
 bot =telebot.TeleBot(api_tele)
 
 stats=[
